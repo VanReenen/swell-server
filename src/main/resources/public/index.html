@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
+
+<body style="background-color: #4b4d4f;">
+    <canvas id="myChart" style="width:100% ;max-width:100% ;background-color: #4b4d4f"></canvas>
+    <canvas id="chart2" style="width:100% ;max-width:100% ;background-color: #4b4d4f"></canvas>
+
+    <script>
+        Chart.defaults.color = "#FFFFFF";
+
+        async function fetchAsync(url) {
+            var response = await fetch(url);
+            var data = await response.json();
+            return await data;
+        };
+
+        var fetchData = fetchAsync('http://localhost:7777/surf/muizenberg').then((data) => {
+            var timeStamps = data['time'];
+            var waveHeight = data['wave_height'];
+            var wavePeriod = data['wave_period'];
+            var swellWaveHeight = data['swell_wave_height'];
+            var swellWavePeriod = data['swell_wave_period'];
+            var projectedWaveFace = data['projectedWaveFace']
+
+            new Chart("myChart", {
+                type: "line",
+                data: {
+                    labels: timeStamps,
+                    datasets: [{
+                        label: 'Wave Period',
+                        fill: false,
+                        borderColor: "green",
+                        data: wavePeriod
+                    }, {
+                        label: 'Swell Period',
+                        fill: false,
+                        borderColor: "purple",
+                        data: swellWavePeriod
+                    }]
+                },
+                options: {
+                    interaction: {
+                        intersect: false,
+                        mode: 'index',
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: (ctx) => {
+                                const { axis = 'xy', intersect, mode } = ctx.chart.options.interaction;
+                                return 'Wave & Swell period (seconds)';
+                            }
+                        }
+                    },
+
+                    legend: { display: false },
+                    scales: {
+                        y: {
+                            display: true,
+                            scaleLabel: {
+                                display: true,
+                                labelString: "Value"
+                            },
+                        }
+                    }
+                }
+            });
+
+            new Chart("chart2", {
+                type: "line",
+                data: {
+                    labels: timeStamps,
+                    datasets: [{
+                        label: 'Wave Height',
+                        fill: false,
+                        borderColor: "red",
+                        data: waveHeight
+                    }, {
+                        label: 'Swell Height',
+                        fill: false,
+                        borderColor: "blue",
+                        data: swellWaveHeight
+                    }, {
+                        label: 'Projected Wave Face Size',
+                        fill: false,
+                        borderColor: "yellow",
+                        data: projectedWaveFace
+                    }]
+                },
+                options: {
+                    interaction: {
+                        intersect: false,
+                        mode: 'index',
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: (ctx) => {
+                                const { axis = 'xy', intersect, mode } = ctx.chart.options.interaction;
+                                return 'Wave & Swell height (metres)';
+                            }
+                        }
+                    }
+                    ,
+
+                    legend: {
+                        display: true,
+                    },
+                    scales: {
+                        y: {
+                            display: true,
+                            scaleLabel: {
+                                display: true,
+                                labelString: "Value"
+                            },
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>
