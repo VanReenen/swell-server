@@ -2,7 +2,7 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-!**/formatter.xml
+**/resources/formatter.xml
 
 ### STS ###
 .apt_generated

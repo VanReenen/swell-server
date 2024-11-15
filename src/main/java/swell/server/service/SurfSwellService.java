@@ -5,6 +5,7 @@ import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
@@ -34,38 +35,69 @@ public class SurfSwellService {
 
         /**
          * @return the wave height of the {@link LocationDTO} provided.
+         * 
+         * @throws XMateoClient when an error occurs while fetching the wave height
+         *                      data.
          */
         public List<BigDecimal> getWaveHeightData(LocationDTO locationDTO) {
-                return getSurfData(locationDTO.latitude(),
-                                locationDTO.longitude(), SurfSwellConstants.Parameters.WAVE_HEIGHT).hourly()
-                                .wave_height();
+                try {
+                        return getSurfData(locationDTO.latitude(),
+                                        locationDTO.longitude(), SurfSwellConstants.Parameters.WAVE_HEIGHT).hourly()
+                                        .wave_height();
+                } catch (Exception e) {
+                        throw new XMateoClient(ErrorMessages.getErrorGettingWaveHeightMessage(e));
+                }
         }
 
         /**
          * @return the wave period of the {@link LocationDTO} provided.
+         * 
+         * @throws XMateoClient when an error occurs while fetching the wave period
+         *                      data.
          */
         public List<BigDecimal> getWavePeriodData(LocationDTO locationDTO) {
-                return getSurfData(locationDTO.latitude(),
-                                locationDTO.longitude(), SurfSwellConstants.Parameters.WAVE_PERIOD).hourly()
-                                .wave_period();
+                try {
+                        return Optional.ofNullable(getSurfData(locationDTO.latitude(),
+                                        locationDTO.longitude(), SurfSwellConstants.Parameters.WAVE_PERIOD).hourly()
+                                        .wave_period()).orElse(List.of());
+                } catch (Exception e) {
+                        throw new XMateoClient(ErrorMessages.getErrorGettingWavePeriodMessage(e));
+                }
+
         }
 
         /**
          * @return the swell wave height of the {@link LocationDTO} provided.
+         * 
+         * @throws XMateoClient when an error occurs while fetching the swell height
+         *                      data.
          */
         public List<BigDecimal> getSwellHeightData(LocationDTO locationDTO) {
-                return getSurfData(locationDTO.latitude(),
-                                locationDTO.longitude(), SurfSwellConstants.Parameters.SWELL_WAVE_HEIGHT).hourly()
-                                .swell_wave_height();
+                try {
+                        return Optional.ofNullable(getSurfData(locationDTO.latitude(),
+                                        locationDTO.longitude(), SurfSwellConstants.Parameters.SWELL_WAVE_HEIGHT)
+                                        .hourly()
+                                        .swell_wave_height()).orElse(List.of());
+                } catch (Exception e) {
+                        throw new XMateoClient(ErrorMessages.getErrorGettingSwellHeightMessage(e));
+                }
         }
 
         /**
          * @return the swell wave period of the {@link LocationDTO} provided.
+         * 
+         * @throws XMateoClient when an error occurs while fetching the swell period
+         *                      data.
          */
         public List<BigDecimal> getSwellPeriodData(LocationDTO locationDTO) {
-                return getSurfData(locationDTO.latitude(),
-                                locationDTO.longitude(), SurfSwellConstants.Parameters.SWELL_WAVE_PERIOD).hourly()
-                                .swell_wave_period();
+                try {
+                        return Optional.ofNullable(getSurfData(locationDTO.latitude(),
+                                        locationDTO.longitude(), SurfSwellConstants.Parameters.SWELL_WAVE_PERIOD)
+                                        .hourly()
+                                        .swell_wave_period()).orElse(List.of());
+                } catch (Exception e) {
+                        throw new XMateoClient(ErrorMessages.getErrorGettingSwellPeriodMessage(e));
+                }
         }
 
         /**
@@ -118,13 +150,13 @@ public class SurfSwellService {
          * 
          * @return an {@link OpenMateoDTO} with the desired information.
          */
-        private OpenMateoOceanicWaveDataDTO getSurfData(String latitude, String longitude, String requestData) {
+        protected OpenMateoOceanicWaveDataDTO getSurfData(String latitude, String longitude, String requestData) {
                 return webClient.get()
                                 .uri(uri -> getSurfDataApiRequest(uri, latitude, longitude, requestData))
                                 .accept(MediaType.APPLICATION_JSON).retrieve()
                                 .bodyToMono(OpenMateoOceanicWaveDataDTO.class)
                                 .blockOptional()
-                                .orElseThrow(() -> new XMateoClient("Error occurred while fetching data."));
+                                .orElseThrow(() -> new XMateoClient(ErrorMessages.OPEN_MATEO_CLIENT_ERROR));
         }
 
         /**
@@ -148,5 +180,47 @@ public class SurfSwellService {
          */
         private String formatApiRequest(URI path) {
                 return path.toString().replace("\"", "");
+        }
+
+        /**
+         * Error messages used in {@link SurfSwellService}.
+         */
+        public static class ErrorMessages {
+                public static final String OPEN_MATEO_CLIENT_ERROR = "Error occurred while fetching Open Mateo data.";
+                private static final String ERROR_GETTING_WAVE_HEIGHT = """
+                                Error occurred while fetching wave height data. The following exception was thrown:
+                                %s
+                                """;
+
+                private static final String ERROR_GETTING_WAVE_PERIOD = """
+                                Error occurred while fetching wave period data. The following exception was thrown:
+                                %s
+                                """;
+
+                private static final String ERROR_GETTING_SWELL_HEIGHT = """
+                                Error occurred while fetching swell wave height data. The following exception was thrown:
+                                %s
+                                """;
+
+                private static final String ERROR_GETTING_SWELL_PERIOD = """
+                                Error occurred while fetching swell wave period data. The following exception was thrown:
+                                %s
+                                """;
+
+                public static String getErrorGettingWaveHeightMessage(Exception e) {
+                        return ERROR_GETTING_WAVE_HEIGHT.formatted(e);
+                }
+
+                public static String getErrorGettingWavePeriodMessage(Exception e) {
+                        return ERROR_GETTING_WAVE_PERIOD.formatted(e);
+                }
+
+                public static String getErrorGettingSwellHeightMessage(Exception e) {
+                        return ERROR_GETTING_SWELL_HEIGHT.formatted(e);
+                }
+
+                public static String getErrorGettingSwellPeriodMessage(Exception e) {
+                        return ERROR_GETTING_SWELL_PERIOD.formatted(e);
+                }
         }
 }
