@@ -1,6 +1,6 @@
 name: Java CI with Maven
 on:
-  [push]
+  push
   workflow_run:
     workflows: [builSwellServer]
     types:
