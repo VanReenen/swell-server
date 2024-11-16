@@ -19,13 +19,14 @@ import swell.server.model.OpenMateoOceanicWaveDataDTO;
 public class SwellServerTestUtils {
 
     private Random randomNumberGenerator = new Random();
+    private RandomStringUtils randomStringUtils = RandomStringUtils.secureStrong();
 
     /**
      * @return {@link OpenMateoOceanicWaveDataDTO} populated with random values.
      */
     public OpenMateoOceanicWaveDataDTO.OpenMateoOceanicWaveDataDTOBuilder getOpenMateoOceanicWaveDataDTO() {
         return OpenMateoOceanicWaveDataDTO.builder().elevation(BigDecimal.valueOf(randomNumberGenerator.nextLong()))
-                .latitude(RandomStringUtils.randomNumeric(8)).longitude(RandomStringUtils.randomNumeric(8))
+                .latitude(randomStringUtils.nextNumeric(8)).longitude(randomStringUtils.nextNumeric(8))
                 .timezone_abbreviation("UTC");
     }
 
@@ -69,7 +70,7 @@ public class SwellServerTestUtils {
      * @return {@link LocationDTO} with populated with random values.
      */
     public LocationDTO.LocationDTOBuilder getLocationDTO() {
-        return LocationDTO.builder().latitude(RandomStringUtils.randomNumeric(8))
-                .longitude(RandomStringUtils.randomNumeric(8));
+        return LocationDTO.builder().latitude(randomStringUtils.nextNumeric(8))
+                .longitude(randomStringUtils.nextNumeric(8));
     }
 }
