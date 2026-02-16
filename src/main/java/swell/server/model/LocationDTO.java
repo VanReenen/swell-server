@@ -8,6 +8,6 @@ import lombok.With;
  */
 @Builder
 @With
-public record LocationDTO(String latitude, String longitude) {
+public record LocationDTO(String name, String latitude, String longitude) {
 
 }

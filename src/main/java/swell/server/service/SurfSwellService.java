@@ -33,6 +33,26 @@ public class SurfSwellService {
                 this.webClient = webClient;
         }
 
+        public List<LocationDTO> searchLocations(String name) {
+                return getLocationsData(name);
+        }
+
+        /**
+         * Search for locations using the API
+         * 
+         * @param name the location's name
+         * @return a {@link List} of possible matching locations
+         */
+        private List<LocationDTO> getLocationsData(String name) {
+                return webClient.get()
+                                .uri(uri -> getLocationURI(name, uri))
+                                .accept(MediaType.APPLICATION_JSON).retrieve()
+                                .bodyToFlux(LocationDTO.class)
+                                .collectList()
+                                .blockOptional()
+                                .orElseThrow(() -> new XMateoClient(ErrorMessages.OPEN_MATEO_CLIENT_ERROR));
+        }
+
         /**
          * @return the wave height of the {@link LocationDTO} provided.
          * 
@@ -129,7 +149,7 @@ public class SurfSwellService {
          * @return the full {@link OceanicDataDTO} for the desired location.
          */
         public OceanicDataDTO getOceanicData(String latitude, String longitude) {
-                var location = new LocationDTO(latitude, longitude);
+                var location = new LocationDTO("", latitude, longitude);
                 var waveHeight = getWaveHeightData(location);
                 var swellWaveHeight = getSwellHeightData(location);
 
@@ -159,9 +179,6 @@ public class SurfSwellService {
                                 .orElseThrow(() -> new XMateoClient(ErrorMessages.OPEN_MATEO_CLIENT_ERROR));
         }
 
-        /**
-         * @return {@link URI} of the API request.
-         */
         private URI getSurfDataApiRequest(UriBuilder uriBuilder, String latitude, String longitude,
                         String requestData) {
                 return URI.create(formatApiRequest(uriBuilder.path(SurfSwellConstants.Paths.MARINE_OPEN_API_SWELL_PATH)
@@ -171,6 +188,13 @@ public class SurfSwellService {
                                                 longitude)
                                 .queryParam(SurfSwellConstants.Parameters.HOURLY,
                                                 requestData)
+                                .build()));
+        }
+
+        private URI getLocationURI(String name, UriBuilder uriBuilder) {
+                return URI.create(formatApiRequest(uriBuilder.path(SurfSwellConstants.Paths.MARINE_OPEN_API_SWELL_PATH)
+                                .queryParam(SurfSwellConstants.Parameters.NAME,name)
+                                .queryParam("count", 10)
                                 .build()));
         }
 

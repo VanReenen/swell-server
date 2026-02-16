@@ -11,16 +11,10 @@ public interface SurfSwellConstants {
     public class Paths {
         public static final String MARINE_OPEN_API_BASE_URL = "https://marine-api.open-meteo.com";
         public static final String MARINE_OPEN_API_SWELL_PATH = "/v1/marine";
-        public static final String MUIZENBERG_SURF_DATA = "/surf/muizenberg";
         public static final String SURF_DATA = "/surf";
-    }
 
-    /**
-     * Known constant locations.
-     */
-    public class Locations {
-        public static final String MUIZENBERG_LATITUDE = "-33.7972";
-        public static final String MUIZENBERG_LONGITUDE = "18.4620";
+        public static final String MARINE = "/v1/marine";
+        public static final String SEARCH_LOCATION = "/v1/search";
     }
 
     /**
@@ -34,5 +28,8 @@ public interface SurfSwellConstants {
         public static final String WAVE_PERIOD = "wave_period";
         public static final String SWELL_WAVE_HEIGHT = "swell_wave_height";
         public static final String SWELL_WAVE_PERIOD = "swell_wave_period";
+
+        public static final String NAME = "name";
+        public static final String LOCATION = "location";
     }
 }
